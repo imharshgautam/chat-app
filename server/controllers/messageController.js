@@ -1,3 +1,4 @@
+import { response } from "express";
 import User from "../models/user.js";
 import Message from "../routes/Message.js";
 
@@ -40,6 +41,19 @@ export const getUsersForSidebar = async (req, res) => {
 
 export const getMessages = async(req, res)=>{
     try {
+        const {id: selectedUserId} = req.params;
+        const myId = req.user._id;
+
+        const messages = await Message.find({
+            $or: [
+                {senderId: myId, receiverId: selectedUserId},
+                {senderId: selectedUserId, receiverId: myId}
+            ]
+        })
+
+        await Message.updateMany({senderId: selectedUserId, receiverId: myId},{seen: true});
+
+        response.json({success: true, messages})
         
     } catch (error) {
         console.log(error.Message)
@@ -48,3 +62,18 @@ export const getMessages = async(req, res)=>{
     }
 
 }
+
+
+// api to mark message as seen using message id
+
+export const markMessageAsSeen = async(req, res) =>{
+    try {
+        const {id} = req.params;
+        await Message.findByIdAndUpdate(id,{seen: true});
+        res.json({success: true});
+    } catch (error) {
+        console.log(error.Message);
+        res.json({ success: false, message: error.message });
+        
+    }
+} 
