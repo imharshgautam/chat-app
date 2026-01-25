@@ -1,17 +1,39 @@
-import React, { useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import assets from '../assets/assets';
+import { AuthContext } from '../../context/AuthContext';
 
 const ProfilePage = () => {
 
+  const {authUser, updateProfile} = useContext(AuthContext)
+
   const [selectedImg, setSelectedImg] = useState(null)
   const navigate = useNavigate();
-  const [Name, setName] = useState("Martin Johnson")
-  const [bio, setBio] = useState("Hi Everyone, I am using QuickChat")
+  const [Name, setName] = useState(authUser?.fullName || "")
+  const [bio, setBio] = useState(authUser?.bio || "")
+
+  useEffect(() => {
+    if(authUser) {
+      setName(authUser.fullName || "")
+      setBio(authUser.bio || "")
+    }
+  }, [authUser])
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/')
+    if(!selectedImg){
+      await updateProfile({fullName: Name, bio});
+      navigate('/')
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(selectedImg);
+    reader.onload = async () => {
+      const base64Image = reader.result;
+      await updateProfile({profilePic: base64Image, fullName: Name, bio});
+      navigate('/');
+    }
   }
 
   return (
@@ -31,7 +53,7 @@ const ProfilePage = () => {
               hidden
             />
             <img
-              src={selectedImg ? URL.createObjectURL(selectedImg) : assets.avatar_icon}
+              src={selectedImg ? URL.createObjectURL(selectedImg) : (authUser?.profilePic || assets.avatar_icon)}
               alt=""
               className={`w-12 h-12 rounded-full object-cover border-2 border-violet-400 ${selectedImg && 'rounded-full'}`}
             />
@@ -65,8 +87,8 @@ const ProfilePage = () => {
         </form>
 
         <img
-          className='max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10'
-          src={assets.logo_icon}
+          className={`max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10 object-cover`}
+          src={selectedImg ? URL.createObjectURL(selectedImg) : (authUser?.profilePic || assets.logo_icon)}
           alt=""
         />
       </div>

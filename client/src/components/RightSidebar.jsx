@@ -1,7 +1,24 @@
-import React from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import assets, { imagesDummyData } from '../assets/assets'
+import { ChatContext } from '../../context/ChatContext'
+import { AuthContext } from '../../context/AuthContext'
 
-const RightSidebar = ({ selectedUser }) => {
+const RightSidebar = () => {
+
+  const {selectedUser, messages} = useContext(ChatContext)
+  const {logout, onlineUser} = useContext(AuthContext)
+  const [msgImages, setMsgImages] = useState([])
+
+  // get all images from message and set them to state
+
+  useEffect(()=>{
+    if(messages && selectedUser) {
+      setMsgImages(
+        messages.filter(msg=>msg.image).map(msg=>msg.image)
+      )
+    }
+  },[messages, selectedUser])
+
   return (
     selectedUser && (
       <div
@@ -18,7 +35,7 @@ const RightSidebar = ({ selectedUser }) => {
           />
 
           <h1 className="px-10 text-xl font-medium mx-auto flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+            {onlineUser.includes(selectedUser._id) && <span className="w-2 h-2 rounded-full bg-green-500"></span>}
             {selectedUser.fullName}
           </h1>
 
@@ -34,7 +51,7 @@ const RightSidebar = ({ selectedUser }) => {
           <p className="mb-2">Media</p>
 
           <div className="max-h-[200px] overflow-y-scroll grid grid-cols-2 gap-4 opacity-90">
-            {imagesDummyData.map((url, index) => (
+            {msgImages.map((url, index) => (
               <div
                 key={index}
                 onClick={() => window.open(url, '_blank')}
@@ -53,6 +70,7 @@ const RightSidebar = ({ selectedUser }) => {
 
         {/* ---------- LOGOUT ---------- */}
         <button
+          onClick={()=>logout()}
           className="absolute bottom-5 left-1/2 -translate-x-1/2
           bg-gradient-to-r from-purple-400 to-violet-600
           text-white text-sm font-light py-2 px-20
