@@ -16,7 +16,7 @@ app.use(cors({
     origin: true,  // Allow all origins
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+       allowedHeaders: ['Content-Type', 'Authorization', 'token'],
     preflightContinue: false,  // End preflight requests immediately
     optionsSuccessStatus: 200  // Return 200 for OPTIONS
 }));
