@@ -11,7 +11,7 @@ const LoginPage = () => {
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
 
 
-  const {login} = useContext(AuthContext)
+  const { login } = useContext(AuthContext)
 
 
   const onSubmitHandler = (event) => {
@@ -22,26 +22,26 @@ const LoginPage = () => {
       return;
     }
     if (currState === "Sign up") {
-      login('signup', {fullName, email, password, bio})
+      login('signup', { fullName, email, password, bio })
     } else {
-      login('login', {email, password})
+      login('login', { email, password })
     }
   }
 
   return (
-    <div className="min-h-screen bg-cover bg-center flex items-center justify-center gap-8 sm:justify-evenly max-sm:flex-col backdrop-blur-2xl">
-      
+    <div className="min-h-screen bg-cover bg-center flex items-center justify-center gap-8 sm:justify-evenly max-sm:flex-col max-sm:px-4 backdrop-blur-2xl">
+
       {/* -------- Left -------- */}
       <img
         src={assets.logo_big}
         alt="Logo"
-        className="w-[min(30vw,250px)]"
+        className="w-[min(40vw,250px)] max-sm:w-[min(50vw,200px)]"
       />
 
       {/* -------- Right -------- */}
       <form
         onSubmit={onSubmitHandler}
-        className="border-2 bg-white/10 text-white border-gray-500 p-6 flex flex-col gap-6 rounded-lg shadow-lg w-[360px]"
+        className="border-2 bg-white/10 text-white border-gray-500 p-6 max-sm:p-5 flex flex-col gap-6 max-sm:gap-5 rounded-lg shadow-lg w-full max-w-[360px]"
       >
         <h2 className="font-medium text-2xl flex justify-between items-center">
           {currState}
@@ -49,10 +49,11 @@ const LoginPage = () => {
             src={assets.arrow_icon}
             alt="Toggle"
             className="w-5 cursor-pointer"
-            onClick={() => {setIsDataSubmitted(false);
+            onClick={() => {
+              setIsDataSubmitted(false);
             }}
           />}
-          
+
         </h2>
 
         {/* Full Name */}
@@ -63,7 +64,7 @@ const LoginPage = () => {
             onChange={(e) => setFullName(e.target.value)}
             placeholder="Full Name"
             required
-            className="p-2 border border-gray-500 rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="p-3 max-sm:p-3.5 border border-gray-500 rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         )}
 
@@ -76,7 +77,7 @@ const LoginPage = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email Address"
               required
-              className="p-2 border border-gray-500 rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="p-3 max-sm:p-3.5 border border-gray-500 rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
 
             <input
@@ -85,7 +86,7 @@ const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
-              className="p-2 border border-gray-500 rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="p-3 max-sm:p-3.5 border border-gray-500 rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </>
         )}
@@ -98,7 +99,7 @@ const LoginPage = () => {
             onChange={(e) => setBio(e.target.value)}
             placeholder="Provide a short bio..."
             required
-            className="p-2 border border-gray-500 rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            className="p-3 max-sm:p-3.5 border border-gray-500 rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
           />
         )}
 
@@ -119,14 +120,14 @@ const LoginPage = () => {
         </div>
 
 
-        <div className='flex flex-col gap-2'> 
+        <div className='flex flex-col gap-2'>
           {currState === "Sign up" ? (
             <p className='text-sm text-gray-600'>
-              Already have an account? <span onClick={()=>{setCurrState("Login"); setIsDataSubmitted(false)}}
-              className='font-medium text-violet-500 cursor-pointer'>Login here</span>
+              Already have an account? <span onClick={() => { setCurrState("Login"); setIsDataSubmitted(false) }}
+                className='font-medium text-violet-500 cursor-pointer'>Login here</span>
             </p>
           ) : (<p className='text-sm text-gray-600'>
-              Create an account <span onClick={()=>{setCurrState("Sign up")}}
+            Create an account <span onClick={() => { setCurrState("Sign up") }}
               className='font-medium text-violet-500 cursor-pointer'>Click here</span>
           </p>)}
 

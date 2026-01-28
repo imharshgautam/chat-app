@@ -6,6 +6,31 @@
   font-family: "outfit", sans-serif;
 }
 
-::webkit-scrollbar{
+/* Hide scrollbar for all browsers */
+::-webkit-scrollbar{
   display: none;
+}
+
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Improve touch interactions on mobile */
+@media (max-width: 640px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Ensure minimum touch target size */
+  button, a, input[type="button"], input[type="submit"] {
+    min-height: 44px;
+  }
+}
+
+/* Prevent zoom on input focus on iOS */
+@media (max-width: 640px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
 }
