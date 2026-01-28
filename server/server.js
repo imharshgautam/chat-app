@@ -10,13 +10,27 @@ const app = express();
 
 // middleware setup
 app.use(express.json({ limit: "4mb" }));
-app.use(cors());
+
+// CORS configuration - allow all origins
+app.use(cors({
+    origin: true,  // Allow all origins
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    preflightContinue: false,  // End preflight requests immediately
+    optionsSuccessStatus: 200  // Return 200 for OPTIONS
+}));
 
 // Database connection promise
 let dbConnected = false;
 
-// Middleware to ensure DB is connected before handling requests
+// Middleware to ensure DB is connected before handling requests (skip for OPTIONS)
 app.use(async (req, res, next) => {
+    // Skip database connection for OPTIONS requests (CORS preflight)
+    if (req.method === 'OPTIONS') {
+        return next();
+    }
+
     if (!dbConnected) {
         try {
             await connectDB();
@@ -34,44 +48,46 @@ app.get("/api/status", (req, res) => res.send("server is live"));
 app.use("/api/auth", userRouter);
 app.use("/api/messages", messageRouter);
 
-// For local development with Socket.IO
-if (process.env.NODE_ENV !== "production") {
-    const http = await import("http");
-    const { Server } = await import("socket.io");
+// Socket.IO variables (exported for messageController)
+export let io = null;
+export let userSocketMap = {};
 
-    const server = http.default.createServer(app);
+// Initialize HTTP server and Socket.IO
+const http = await import("http");
+const { Server } = await import("socket.io");
 
-    // Initialize socket.io server
-    const io = new Server(server, {
-        cors: { origin: "*" }
-    });
+const server = http.default.createServer(app);
 
-    // store online users
-    const userSocketMap = {}; // {userId: socketId}
+// Initialize socket.io server with CORS
+io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
-    // socket.io connection handler
-    io.on("connection", (socket) => {
-        const userId = socket.handshake.query.userId;
-        console.log("User Connected", userId);
+// Store online users
+userSocketMap = {}; // {userId: socketId}
 
-        if (userId) userSocketMap[userId] = socket.id;
+// Socket.IO connection handler
+io.on("connection", (socket) => {
+    const userId = socket.handshake.query.userId;
+    console.log("User Connected:", userId);
 
-        // emit online users to all connected clients
+    if (userId) userSocketMap[userId] = socket.id;
+
+    // Emit online users to all connected clients
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+    socket.on("disconnect", () => {
+        console.log("User Disconnected:", userId);
+        delete userSocketMap[userId];
         io.emit("getOnlineUsers", Object.keys(userSocketMap));
-
-        socket.on("disconnect", () => {
-            console.log("User Disconnected", userId);
-            delete userSocketMap[userId];
-            io.emit("getOnlineUsers", Object.keys(userSocketMap));
-        });
     });
+});
 
-    const PORT = process.env.PORT || 8000;
-    server.listen(PORT, () => console.log("Server is running on PORT : " + PORT));
-} else {
-    // Connect to MongoDB for production (Vercel)
-    await connectDB();
-}
-
-// export app for Vercel serverless functions
-export default app;
+// Start server
+const PORT = process.env.PORT || 8000;
+server.listen(PORT, () => {
+    console.log("Server is running on PORT:", PORT);
+});
